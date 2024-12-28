@@ -16,9 +16,37 @@ exports.createTask = async (req, res) => {
   }
 };
 
+// exports.updateTask = async (req, res) => {
+//   const { id } = req.params; // Task ID
+//   const { status, priority } = req.body; // Fields to update
+//   const { username } = req.user; // Authenticated user
+
+//   try {
+//     // Check if the task belongs to the user
+//     const task = await pool.query('SELECT * FROM tasks WHERE id = $1 AND created_by = $2', [id, username]);
+//     if (task.rows.length === 0) {
+//       return res.status(404).json({ error: 'Task not found or not authorized' });
+//     }
+
+//     // Update the task
+//     const result = await pool.query(
+//       `UPDATE tasks SET 
+//         status = COALESCE($1, status), 
+//         priority = COALESCE($2, priority) 
+//       WHERE id = $3 
+//       RETURNING *`,
+//       [status, priority, id]
+//     );
+
+//     res.json(result.rows[0]);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Error updating task' });
+//   }
+// };
 exports.updateTask = async (req, res) => {
   const { id } = req.params; // Task ID
-  const { status, priority } = req.body; // Fields to update
+  const { title, status, priority, deadline } = req.body; // Fields to update
   const { username } = req.user; // Authenticated user
 
   try {
@@ -28,14 +56,16 @@ exports.updateTask = async (req, res) => {
       return res.status(404).json({ error: 'Task not found or not authorized' });
     }
 
-    // Update the task
+    // Update the task with all fields
     const result = await pool.query(
       `UPDATE tasks SET 
-        status = COALESCE($1, status), 
-        priority = COALESCE($2, priority) 
-      WHERE id = $3 
+        title = COALESCE($1, title), 
+        status = COALESCE($2, status), 
+        priority = COALESCE($3, priority), 
+        deadline = COALESCE($4, deadline) 
+      WHERE id = $5 
       RETURNING *`,
-      [status, priority, id]
+      [title, status, priority, deadline, id]
     );
 
     res.json(result.rows[0]);
