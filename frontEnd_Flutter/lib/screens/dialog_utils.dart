@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 Future<void> showCreateTaskDialog({
   required BuildContext context,
-  required Function(String title, String deadline, String priority) onCreate,
+  required Function(String title, String deadline, String priority, String? assignedTo) onCreate,
 }) async {
   final titleController = TextEditingController();
   final deadlineController = TextEditingController();
+  final assignedToController = TextEditingController();
   String priority = 'Medium'; // Default value for the dropdown
 
   await showDialog(
@@ -41,6 +42,10 @@ Future<void> showCreateTaskDialog({
                     );
                   }).toList(),
                 ),
+                TextField(
+                  controller: assignedToController,
+                  decoration: InputDecoration(labelText: 'Assigned To (optional)'),
+                ),
               ],
             );
           },
@@ -58,6 +63,7 @@ Future<void> showCreateTaskDialog({
                 titleController.text,
                 deadlineController.text,
                 priority,
+                assignedToController.text.isNotEmpty ? assignedToController.text : null,
               );
               Navigator.of(context).pop();
             },

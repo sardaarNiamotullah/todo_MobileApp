@@ -30,9 +30,9 @@ class _TaskPageState extends State<TaskPage> {
     }
   }
 
-  Future<void> _createTask(String title, String deadline, String priority) async {
+  Future<void> _createTask(String title, String deadline, String priority, String? assignedTo) async {
     try {
-      await _taskService.createTask(title, deadline, priority);
+      await _taskService.createTask(title, deadline, priority, assignedTo);
       _fetchTasks();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Task created successfully')),
@@ -87,10 +87,6 @@ class _TaskPageState extends State<TaskPage> {
     }
   }
 
-  // String _formatDate(String dateTime) {
-  //   final date = DateTime.parse(dateTime);
-  //   return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  // }
   String _formatDate(String dateTime) {
     final date = DateTime.parse(dateTime).toLocal();
     final hours = date.hour % 12 == 0 ? 12 : date.hour % 12;

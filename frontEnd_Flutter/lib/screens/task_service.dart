@@ -29,7 +29,7 @@ class TaskService {
     }
   }
 
-  Future<void> createTask(String title, String deadline, String priority) async {
+  Future<void> createTask(String title, String deadline, String priority, String? assignedTo) async {
     final token = await _getToken();
     if (token == null) {
       throw Exception('Token not found');
@@ -45,6 +45,7 @@ class TaskService {
         'title': title,
         'deadline': deadline,
         'priority': priority,
+        'assigned_to': assignedTo,
       }),
     );
 
