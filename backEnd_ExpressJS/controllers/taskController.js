@@ -16,6 +16,20 @@ exports.createTask = async (req, res) => {
       if (userCheck.rows.length === 0) {
         return res.status(400).json({ error: "Assigned user does not exist" });
       }
+
+      // Check if the assigned user is a friend
+      const friendCheck = await pool.query(
+        `SELECT * FROM friends 
+         WHERE 
+           (user1_username = $1 AND user2_username = $2 AND status = 'Accepted') OR 
+           (user1_username = $2 AND user2_username = $1 AND status = 'Accepted')`,
+        [username, assigned_to]
+      );
+      if (friendCheck.rows.length === 0) {
+        return res
+          .status(403)
+          .json({ error: "You can only assign tasks to friends" });
+      }
       assignedUsername = assigned_to;
     }
 
@@ -58,6 +72,19 @@ exports.updateTask = async (req, res) => {
       );
       if (userCheck.rows.length === 0) {
         return res.status(400).json({ error: "Assigned user does not exist" });
+      }
+      // Check if the assigned user is a friend
+      const friendCheck = await pool.query(
+        `SELECT * FROM friends 
+        WHERE 
+          (user1_username = $1 AND user2_username = $2 AND status = 'Accepted') OR 
+          (user1_username = $2 AND user2_username = $1 AND status = 'Accepted')`,
+        [username, assigned_to]
+      );
+      if (friendCheck.rows.length === 0) {
+        return res
+          .status(403)
+          .json({ error: "You can only assign tasks to friends" });
       }
       assignedUsername = assigned_to;
     }
@@ -127,5 +154,51 @@ exports.getAllTasks = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error fetching tasks" });
+  }
+};
+
+exports.getOwnTasks = async (req, res) => {
+  const { username } = req.user; // Authenticated user
+
+  try {
+    // Get tasks where assigned_to and created_by are the same
+    const result = await pool.query(
+      "SELECT * FROM tasks WHERE assigned_to = $1 AND created_by = $1",
+      [username]
+    );
+
+    // If no tasks are found, send a 404 response
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "No own tasks found for this user" });
+    }
+
+    // Send the tasks as the response
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error fetching own tasks" });
+  }
+};
+
+exports.getAssignedTasks = async (req, res) => {
+  const { username } = req.user; // Authenticated user
+
+  try {
+    // Get tasks where assigned_to and created_by are different
+    const result = await pool.query(
+      "SELECT * FROM tasks WHERE assigned_to = $1 AND created_by != $1",
+      [username]
+    );
+
+    // If no tasks are found, send a 404 response
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "No assigned tasks found for this user" });
+    }
+
+    // Send the tasks as the response
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error fetching assigned tasks" });
   }
 };

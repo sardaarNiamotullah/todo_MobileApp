@@ -7,6 +7,7 @@ dotenv.config();
 
 const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
+const friendRoutes = require('./routes/friendRoutes');
 
 const app = express();
 app.use(cors());
@@ -14,6 +15,7 @@ app.use(bodyParser.json());
 
 app.use('/auth', authRoutes);
 app.use('/tasks', taskRoutes);
+app.use('/friends', friendRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
